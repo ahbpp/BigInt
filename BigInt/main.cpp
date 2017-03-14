@@ -7,9 +7,19 @@
 //
 
 #include <iostream>
+#include "BigInt.hpp"
 
-int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+using namespace std;
+
+int main() {
+    int value = 2345678;
+    BigInt a(value);
+    cin >> a;
+    a.print();
+    char str[] = "123400000000056789";
+    BigInt b(str);
+    b.print();
+    BigInt c(b);
+    cout << c;
     return 0;
 }
