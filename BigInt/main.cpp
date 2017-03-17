@@ -12,14 +12,9 @@
 using namespace std;
 
 int main() {
-    int value = 2345678;
-    BigInt a(value);
-    cin >> a;
-    a.print();
-    char str[] = "123400000000056789";
-    BigInt b(str);
-    b.print();
-    BigInt c(b);
-    cout << c;
+    long long value = 1844674407;
+    BigInt a(34567888);
+    a += value;
+    cout << a;
     return 0;
 }
