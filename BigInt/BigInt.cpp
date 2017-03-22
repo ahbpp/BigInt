@@ -7,12 +7,24 @@
 //
 
 #include "BigInt.hpp"
+#include <cmath>
+#include <stdlib.h>
 
 void BigInt::set_cap(const int cap)
 {
-    this->size = cap;
-    this->value = new int [this->size];
+    this->cap = cap;
+    this->size = 0;
+    this->value = new int [this->cap];
 }
+void BigInt::delete0(){
+    while (this->value[this->size - 1] == 0 && this->size > 1) {
+        this->size--;
+    }
+}
+
+
+
+
 void BigInt::assign(const char *str)
 {
     int len = strlen(str);
@@ -26,19 +38,26 @@ void BigInt::assign(const char *str)
         ost = 0;
     }
     set_cap((len - ost - 1) / DIGIT_COUNT + 1);
-    for (int i  = 0; i < this->size; ++i) {
-        value[i] = 0;
-        for (int j = len - (i + 1) * DIGIT_COUNT; j < len - (i) * DIGIT_COUNT; j++) {
+    this->size = this->cap;
+    for (int i  = 0; i < this->size; i++)
+    {
+        int value = 0;
+        int k = len - (i + 1) * DIGIT_COUNT;
+        int start = max(0, k);
+        for (int j = start; j < len - (i) * DIGIT_COUNT; j++)
+        {
             if (j >= ost)
             {
-                value[i] = (value[i] * 10) + (str[j] - '0');
+                value = (value * 10) + (str[j] - '0');
             }
         }
+        this->value[i] = value;
     }
 }
 void BigInt::assign(const BigInt &that)
 {
     set_cap(that.size);
+    this->size = this->cap;
     this->sign = that.sign;
     for (int i = 0; i < this->size; i++)
     {
@@ -61,6 +80,7 @@ void BigInt::assign(int value)
         n++;
     }
     set_cap(n);
+    this->size = this->cap;
     for (int i  = 0; i < n; i++)
     {
         this->value[i] = value % BASE;
@@ -77,6 +97,7 @@ void BigInt::assign(unsigned int value)
         n++;
     }
     set_cap(n);
+    this->size = this->cap;
     for (int i  = 0; i < n; i++)
     {
         this->value[i] = value % BASE;
@@ -103,11 +124,13 @@ void BigInt::assign(long long value)
         n++;
     }
     set_cap(n);
+    this->size = this->cap;
     for (int i  = 0; i < n; i++)
     {
         this->value[i] = value % BASE;
         value /= BASE;
     }
+    delete0();
 }
 void BigInt::assign(unsigned long long value)
 {
@@ -123,14 +146,20 @@ void BigInt::assign(unsigned long long value)
         n++;
     }
     set_cap(n);
+    this->size = this->cap;
     for (int i  = 0; i < n; i++)
     {
         this->value[i] = value % BASE;
         value /= BASE;
     }
+    delete0();
 }
+
+
+
+
 BigInt::BigInt() {
-    this->size = 0;
+    this->size = this->cap = 0;
 }
 
 BigInt::BigInt(const int &value)
@@ -149,7 +178,6 @@ BigInt::BigInt(const unsigned long long &value)
 {
     assign(value);
 }
-
 BigInt::BigInt(char *str)
 {
     assign(str);
@@ -165,6 +193,8 @@ BigInt::~BigInt()
 }
 
 
+
+
 BigInt BigInt::abs_sum(const BigInt &that) const
 {
     if (this->size < that.size)
@@ -172,8 +202,8 @@ BigInt BigInt::abs_sum(const BigInt &that) const
         return that.abs_sum(*this);
     } else {
         BigInt res;
-        res.size = this->size + 1;
-        res.set_cap(res.size);
+        res.cap = this->size + 1;
+        res.set_cap(res.cap);
         int ost = 0;
         for (int i = 0; i < that.size; i++)
         {
@@ -188,8 +218,9 @@ BigInt BigInt::abs_sum(const BigInt &that) const
         if (ost > 0)
         {
             res.value[this->size] = ost;
+            res.size = res.cap;
         } else {
-            res.size--;
+            res.size = res.cap - 1;
         }
         res.sign = 1;
         return res;
@@ -204,8 +235,8 @@ BigInt BigInt::abs_minus(const BigInt &that) const
         return res;
     } else {
         BigInt res;
-        res.size = this->size;
-        res.set_cap(res.size);
+        res.cap = this->size;
+        res.set_cap(res.cap);
         int ost = 0;
         for (int i = 0; i < that.size; i++)
         {
@@ -229,14 +260,76 @@ BigInt BigInt::abs_minus(const BigInt &that) const
                 res.value[i] = this->value[i] - ost - that.value[i];
             }
         }
-        while (res.value[res.size - 1] == 0 && res.size > 1) {
-            res.size--;
-        }
+        res.size = res.cap;
+        res.delete0();
         res.sign = 1;
         return res;
     }
 }
+BigInt BigInt::num_mult(const int &value) const {
+    BigInt res;
+    res.set_cap(this->size + 1);
+    int ost = 0;
+    for (int i = 0; i < this->size; i++)
+    {
+        res.value[i] = (this->value[i] * value + ost) % BASE;
+        ost = (this->value[i] * value + ost) / BASE;
+    }
+    if (ost > 0)
+    {
+        res.value[this->size] = ost;
+        res.size = res.cap;
+    } else {
+        res.size = res.cap - 1;
+    }
+    res.sign = this->sign;
+    return res;
+}
+BigInt BigInt::mult_by_10() const{
+    BigInt res;
+    res.set_cap(this->size + 1);
+    int ost = 0;
+    for (int i = 0; i < this->size; i++)
+    {
+        res.value[i] = (this->value[i] % (BASE / 10)) * 10 + ost;
+        ost = this->value[i] / (BASE / 10);
+    }
+    res.value[this->size] = ost;
+    res.size = res.cap;
+    res.delete0();
+    res.sign = this->sign;
+    return res;
+}
+BigInt BigInt::mult_by_BASE_in_n(int n) const
+{
+    BigInt res;
+    res.set_cap(this->size + n);
+    res.size = res.cap;
+    for (int i = 0; i < n; i++)
+    {
+        res.value[i] = 0;
+    }
+    for (int i = n; i < res.cap; i++)
+    {
+        res.value[i] = this->value[i - n];
+    }
+    res.sign = this->sign;
+    return res;
+}
+BigInt BigInt::mult_by_10_in_n(int n) const
+{
+    BigInt res(this->mult_by_BASE_in_n(n / DIGIT_COUNT));
+    for (int i = 0; i < n % DIGIT_COUNT; i++)
+    {
+        res = res.mult_by_10();
+    }
+    return res;
+}
 
+
+
+
+//ПОТОКИ
 ostream& operator<<(ostream& res, const BigInt &a)
 {
     if (a.sign == -1 && a.value[a.size - 1] != 0)
@@ -265,6 +358,8 @@ istream& operator>>(istream& in, BigInt &a)
 
 
 
+
+//ПРИСВАИВАНИЕ
 BigInt &BigInt::operator=(const BigInt &that)
 {
     delete [] this->value;
@@ -283,6 +378,11 @@ BigInt &BigInt::operator=(int value)
     assign(value);
     return *this;
 }
+
+
+
+
+//СРАВНЕНИЕ
 bool BigInt::operator>(const BigInt &that) const
 {
     if (this->size < that.size) {
@@ -330,6 +430,11 @@ bool BigInt::operator<(const BigInt &that) const
         return true;
     }
 }
+
+
+
+
+//+
 BigInt BigInt::operator+(const BigInt &that) const
 {
     if (this->sign == that.sign)
@@ -351,6 +456,56 @@ BigInt BigInt::operator+(const BigInt &that) const
         }
     }
 }
+BigInt BigInt::operator+(const int &value) const
+{
+    BigInt that(value);
+    return *this + that;
+}
+BigInt BigInt::operator+(const unsigned int &value) const
+{
+    BigInt that(value);
+    return *this + that;
+}
+BigInt BigInt::operator+(const long long &value) const
+{
+    BigInt that(value);
+    return *this + that;
+}
+BigInt BigInt::operator+(const unsigned long long &value) const
+{
+    BigInt that(value);
+    return *this + that;
+}
+BigInt &BigInt::operator+=(const BigInt &that)
+{
+    *this = *this + that;
+    return *this;
+}
+BigInt &BigInt::operator+=(const int &value)
+{
+    *this = *this + value;
+    return *this;
+}
+BigInt &BigInt::operator+=(const unsigned int &value)
+{
+    *this = *this + value;
+    return *this;
+}
+BigInt &BigInt::operator+=(const long long &value)
+{
+    *this = *this + value;
+    return *this;
+}
+BigInt &BigInt::operator+=(const unsigned long long &value)
+{
+    *this = *this + value;
+    return *this;
+}
+
+
+
+
+//-
 BigInt BigInt::operator-(const BigInt &that) const
 {
     if (this->sign == that.sign)
@@ -374,36 +529,6 @@ BigInt BigInt::operator-(const BigInt &that) const
         }
     }
 }
-BigInt &BigInt::operator+=(const BigInt &that)
-{
-    *this = *this + that;
-    return *this;
-}
-BigInt &BigInt::operator-=(const BigInt &that)
-{
-    *this = *this - that;
-    return *this;
-}
-BigInt BigInt::operator+(const int &value) const
-{
-    BigInt that(value);
-    return *this + that;
-}
-BigInt BigInt::operator+(const unsigned int &value) const
-{
-    BigInt that(value);
-    return *this + that;
-}
-BigInt BigInt::operator+(const long long &value) const
-{
-    BigInt that(value);
-    return *this + that;
-}
-BigInt BigInt::operator+(const unsigned long long &value) const
-{
-    BigInt that(value);
-    return *this + that;
-}
 BigInt BigInt::operator-(const int &value) const
 {
     BigInt that(value);
@@ -424,45 +549,109 @@ BigInt BigInt::operator-(const unsigned long long &value) const
     BigInt that(value);
     return *this - that;
 }
-BigInt &BigInt::operator+=(const int &value)
+BigInt &BigInt::operator-=(const BigInt &that)
 {
-    BigInt that(value);
-    return *this += that;
-}
-BigInt &BigInt::operator+=(const unsigned int &value)
-{
-    BigInt that(value);
-    return *this += that;
-}
-BigInt &BigInt::operator+=(const long long &value)
-{
-    BigInt that(value);
-    return *this += that;
-}
-BigInt &BigInt::operator+=(const unsigned long long &value)
-{
-    BigInt that(value);
-    return *this += that;
+    *this = *this - that;
+    return *this;
 }
 BigInt &BigInt::operator-=(const int &value)
 {
-    BigInt that(value);
-    return *this -= that;
+    *this = *this - value;
+    return *this;
 }
 BigInt &BigInt::operator-=(const unsigned int &value)
 {
-    BigInt that(value);
-    return *this -= that;
+    *this = *this - value;
+    return *this;
 }
 BigInt &BigInt::operator-=(const long long &value)
 {
-    BigInt that(value);
-    return *this -= that;
+    *this = *this - value;
+    return *this;
 }
 BigInt &BigInt::operator-=(const unsigned long long &value)
 {
+    *this = *this - value;
+    return *this;
+}
+
+
+
+
+//*
+BigInt BigInt::operator*(const BigInt &that) const
+{
+    BigInt res(0);
+    for (int i = 0; i < that.size; i++)
+    {
+        for (int j = 0; j < DIGIT_COUNT; j++)
+        {
+            res += (*this * (that.value[i] / int (pow(10, j)) % 10)).mult_by_10_in_n(i * DIGIT_COUNT + j);
+        }
+    }
+    res.sign = this->sign * that.sign;
+    return res;
+}
+BigInt BigInt::operator*(const int &value) const
+{
+    if (value >= 0 && value < 10)
+    {
+        return num_mult(value);
+    }
     BigInt that(value);
-    return *this -= that;
+    return *this * that;
+}
+BigInt BigInt::operator*(const unsigned int &value) const
+{
+    if (value < 10)
+    {
+        return num_mult(value);
+    }
+    BigInt that(value);
+    return *this * that;
+}
+BigInt BigInt::operator*(const long long &value) const
+{
+    if (value >= 0 && value < 10)
+    {
+        return num_mult(value); 
+    }
+    BigInt that(value);
+    return *this * that;
+}
+BigInt BigInt::operator*(const unsigned long long &value) const
+{
+    if (value < 10)
+    {
+        return num_mult(value);
+    }
+    BigInt that(value);
+    return *this * that;
+}
+BigInt &BigInt::operator*=(const BigInt &that)
+{
+    *this = *this * that;
+    return *this;
+}
+BigInt &BigInt::operator*=(const int &value)
+{
+    *this = *this * value;
+    return *this;
+}
+BigInt &BigInt::operator*=(const unsigned int &value)
+{
+    *this = *this * value;
+    return *this;
+}
+BigInt &BigInt::operator*=(const long long &value)
+{
+    *this = *this * value;
+    return *this;
+}
+BigInt &BigInt::operator*=(const unsigned long long &value)
+{
+    *this = *this * value;
+    return *this;
 }
 
 

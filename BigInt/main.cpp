@@ -12,9 +12,11 @@
 using namespace std;
 
 int main() {
-    long long value = 1844674407;
-    BigInt a(34567888);
-    a += value;
+    unsigned long long value = 1847;
+    BigInt a(value);
+    BigInt b("-8655");
+    cout << b;
+    a *= b;
     cout << a;
     return 0;
 }

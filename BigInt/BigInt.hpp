@@ -20,6 +20,7 @@ private:
     const unsigned int BASE = 1000;
     const unsigned int DIGIT_COUNT = 3;
     int size;
+    int cap;
     int *value;
     int sign;
     
@@ -30,8 +31,15 @@ private:
     void assign(unsigned int value);
     void assign(long long value);
     void assign(unsigned long long value);
+    void delete0();
+    
     BigInt abs_sum(const BigInt &that) const;
     BigInt abs_minus(const BigInt &that) const;
+    BigInt num_mult(const int &value) const;
+    BigInt mult_by_10() const;
+    BigInt mult_by_BASE_in_n(int n) const;
+    BigInt mult_by_10_in_n(int n) const;
+    
     BigInt();
 public:
     BigInt(const int &value);
@@ -71,9 +79,23 @@ public:
     BigInt &operator-=(const long long &value);
     BigInt &operator-=(const unsigned long long &value);
     
+    BigInt operator*(const BigInt &that) const;
+    BigInt operator*(const int &value) const;
+    BigInt operator*(const unsigned int &value) const;
+    BigInt operator*(const long long &value) const;
+    BigInt operator*(const unsigned long long &value) const;
+    BigInt &operator*=(const BigInt &that);
+    BigInt &operator*=(const int &value);
+    BigInt &operator*=(const unsigned int &value);
+    BigInt &operator*=(const long long &value);
+    BigInt &operator*=(const unsigned long long &value);
+
+    
     bool operator>(const BigInt &that) const;
     bool operator<(const BigInt &that) const;
     bool operator==(const BigInt &that) const;
+    
+    
 };
 
 #endif /* BigInt_hpp */
