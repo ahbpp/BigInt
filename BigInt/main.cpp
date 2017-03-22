@@ -12,11 +12,15 @@
 using namespace std;
 
 int main() {
-    unsigned long long value = 1847;
+    int value = 2;
     BigInt a(value);
-    BigInt b("-8655");
-    cout << b;
-    a *= b;
+    for (int i = 0; i < 10; i++)
+    {
+        a *= 2;
+        cout << a;
+    }
+    a /= 33;
+    cout << a--;
     cout << a;
     return 0;
 }

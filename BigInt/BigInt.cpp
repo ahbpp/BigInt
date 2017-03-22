@@ -10,6 +10,12 @@
 #include <cmath>
 #include <stdlib.h>
 
+
+BigIntegerDivisionByZero::BigIntegerDivisionByZero() : logic_error("Division by zero") {};
+BigIntegerOverflow::BigIntegerOverflow() : overflow_error("Over flow") {};
+
+
+
 void BigInt::set_cap(const int cap)
 {
     this->cap = cap;
@@ -59,9 +65,17 @@ void BigInt::assign(const BigInt &that)
     set_cap(that.size);
     this->size = this->cap;
     this->sign = that.sign;
+    memcpy(this->value, that.value, that.size * sizeof(int));
+}
+void BigInt::assign(const BigInt &that, const int n)
+{
+    set_cap(that.size - n);
+    this->size = this->cap;
+    this->sign = that.sign;
+    int delta = that.size - this->size;
     for (int i = 0; i < this->size; i++)
     {
-        this->value[i] = that.value[i];
+        this->value[i] = that.value[i + delta];
     }
 }
 void BigInt::assign(int value)
@@ -182,10 +196,13 @@ BigInt::BigInt(char *str)
 {
     assign(str);
 }
-
 BigInt::BigInt(const BigInt &that)
 {
     assign(that);
+}
+BigInt::BigInt(const BigInt &that, const int n)
+{
+    assign(that, n);
 }
 BigInt::~BigInt()
 {
@@ -202,8 +219,7 @@ BigInt BigInt::abs_sum(const BigInt &that) const
         return that.abs_sum(*this);
     } else {
         BigInt res;
-        res.cap = this->size + 1;
-        res.set_cap(res.cap);
+        res.set_cap(this->size + 1);
         int ost = 0;
         for (int i = 0; i < that.size; i++)
         {
@@ -242,22 +258,22 @@ BigInt BigInt::abs_minus(const BigInt &that) const
         {
             if (that.value[i] > this->value[i] - ost)
             {
-                ost = 1;
                 res.value[i] = this->value[i] - ost + BASE - that.value[i];
+                ost = 1;
             } else {
-                ost = 0;
                 res.value[i] = this->value[i] - ost - that.value[i];
+                ost = 0;
             }
         }
         for (int i = that.size; i < this->size; i++)
         {
             if (this->value[i] - ost < 0)
             {
+                res.value[i] = this->value[i] - ost + BASE;
                 ost = 1;
-                res.value[i] = this->value[i] - ost + BASE - that.value[i];
             } else {
+                res.value[i] = this->value[i] - ost;
                 ost = 0;
-                res.value[i] = this->value[i] - ost - that.value[i];
             }
         }
         res.size = res.cap;
@@ -325,7 +341,44 @@ BigInt BigInt::mult_by_10_in_n(int n) const
     }
     return res;
 }
-
+BigInt BigInt::division(const BigInt &that) const
+{
+    BigInt res;
+    BigInt newthat(that);
+    newthat.sign = 1;
+    res.set_cap(this->size - newthat.size + 1);
+    res.size = res.cap;
+    int i = this->size - 2;
+    BigInt temp;
+    temp.set_cap(1);
+    temp.size = 1;
+    temp.value[0] = this->value[this->size - 1];
+    temp.sign = 1;
+    int j = 0;
+    while (i >= 0)
+    {
+        while (i >= 0 && newthat > temp) {
+            temp = temp.mult_by_BASE_in_n(1) + this->value[i];
+            //cout << "temp  " << temp;
+            i--;
+        }
+        if (temp > newthat)
+        {
+            int base_res = 0;
+            while (temp > newthat)
+            {
+                temp -= newthat;
+                base_res++;
+            }
+            res.value[res.size - 1 - j] = base_res;
+            //cout << "res  " << res.value[res.size - 1 - j] << endl;
+            j++;
+        }
+    }
+    res.sign = this->sign * that.sign;
+    BigInt result(res, res.size - j);
+    return result;
+}
 
 
 
@@ -358,7 +411,6 @@ istream& operator>>(istream& in, BigInt &a)
 
 
 
-
 //ПРИСВАИВАНИЕ
 BigInt &BigInt::operator=(const BigInt &that)
 {
@@ -378,7 +430,6 @@ BigInt &BigInt::operator=(int value)
     assign(value);
     return *this;
 }
-
 
 
 
@@ -430,7 +481,6 @@ bool BigInt::operator<(const BigInt &that) const
         return true;
     }
 }
-
 
 
 
@@ -501,8 +551,17 @@ BigInt &BigInt::operator+=(const unsigned long long &value)
     *this = *this + value;
     return *this;
 }
-
-
+BigInt &BigInt::operator++()
+{
+    *this = *this + 1;
+    return *this;
+}
+BigInt BigInt::operator++(int)
+{
+    BigInt old(*this);
+    ++*this;
+    return old;
+}
 
 
 //-
@@ -574,7 +633,17 @@ BigInt &BigInt::operator-=(const unsigned long long &value)
     *this = *this - value;
     return *this;
 }
-
+BigInt &BigInt::operator--()
+{
+    *this = *this - 1;
+    return *this;
+}
+BigInt BigInt::operator--(int)
+{
+    BigInt old(*this);
+    --*this;
+    return old;
+}
 
 
 
@@ -656,3 +725,67 @@ BigInt &BigInt::operator*=(const unsigned long long &value)
 
 
 
+//division
+BigInt BigInt::operator/(const BigInt &that) const{
+    if (that == BigInt(0))
+    {
+        throw BigIntegerDivisionByZero();
+    } else {
+        if (that > *this)
+        {
+            return BigInt(0);
+        } else {
+            if (*this == that)
+            {
+                return BigInt(1);
+            } else {
+                return division(that);
+            }
+        }
+    }
+}
+BigInt BigInt::operator/(const int &value) const
+{
+    BigInt that(value);
+    return *this / that;
+}
+BigInt BigInt::operator/(const unsigned int &value) const
+{
+    BigInt that(value);
+    return *this / that;
+}
+BigInt BigInt::operator/(const long long &value) const
+{
+    BigInt that(value);
+    return *this / that;
+}
+BigInt BigInt::operator/(const unsigned long long &value) const
+{
+    BigInt that(value);
+    return *this / that;
+}
+BigInt &BigInt::operator/=(const BigInt &that)
+{
+    *this = *this / that;
+    return *this;
+}
+BigInt &BigInt::operator/=(const int &value)
+{
+    *this = *this / value;
+    return *this;
+}
+BigInt &BigInt::operator/=(const unsigned int &value)
+{
+    *this = *this / value;
+    return *this;
+}
+BigInt &BigInt::operator/=(const long long &value)
+{
+    *this = *this / value;
+    return *this;
+}
+BigInt &BigInt::operator/=(const unsigned long long &value)
+{
+    *this = *this / value;
+    return *this;
+}

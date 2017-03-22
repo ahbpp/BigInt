@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
@@ -27,6 +28,7 @@ private:
     void set_cap (const int cap);
     void assign(const char *);
     void assign(const BigInt &that);
+    void assign(const BigInt &that, const int n);
     void assign(int value);
     void assign(unsigned int value);
     void assign(long long value);
@@ -39,8 +41,14 @@ private:
     BigInt mult_by_10() const;
     BigInt mult_by_BASE_in_n(int n) const;
     BigInt mult_by_10_in_n(int n) const;
+    BigInt division(const BigInt &that) const;
+    
+    bool operator>(const BigInt &that) const;
+    bool operator<(const BigInt &that) const;
+    bool operator==(const BigInt &that) const;
     
     BigInt();
+    BigInt(const BigInt &that, const int n);
 public:
     BigInt(const int &value);
     BigInt(const unsigned int &value);
@@ -67,6 +75,8 @@ public:
     BigInt &operator+=(const unsigned int &value);
     BigInt &operator+=(const long long &value);
     BigInt &operator+=(const unsigned long long &value);
+    BigInt &operator++();
+    BigInt operator++(int);
     
     BigInt operator-(const BigInt &that) const;
     BigInt operator-(const int &value) const;
@@ -78,6 +88,8 @@ public:
     BigInt &operator-=(const unsigned int &value);
     BigInt &operator-=(const long long &value);
     BigInt &operator-=(const unsigned long long &value);
+    BigInt &operator--();
+    BigInt operator--(int);
     
     BigInt operator*(const BigInt &that) const;
     BigInt operator*(const int &value) const;
@@ -89,13 +101,26 @@ public:
     BigInt &operator*=(const unsigned int &value);
     BigInt &operator*=(const long long &value);
     BigInt &operator*=(const unsigned long long &value);
+    
+    BigInt operator/(const BigInt &that) const;
+    BigInt operator/(const int &value) const;
+    BigInt operator/(const unsigned int &value) const;
+    BigInt operator/(const long long &value) const;
+    BigInt operator/(const unsigned long long &value) const;
+    BigInt &operator/=(const BigInt &that);
+    BigInt &operator/=(const int &value);
+    BigInt &operator/=(const unsigned int &value);
+    BigInt &operator/=(const long long &value);
+    BigInt &operator/=(const unsigned long long &value);
+};
 
-    
-    bool operator>(const BigInt &that) const;
-    bool operator<(const BigInt &that) const;
-    bool operator==(const BigInt &that) const;
-    
-    
+class BigIntegerDivisionByZero : logic_error {
+public:
+    BigIntegerDivisionByZero();
+};
+class BigIntegerOverflow : overflow_error {
+public:
+    BigIntegerOverflow();
 };
 
 #endif /* BigInt_hpp */
