@@ -13,13 +13,14 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include <cstring>
 
 using namespace std;
 
 class BigInt {
 private:
-    const unsigned int BASE = 1000;
-    const unsigned int DIGIT_COUNT = 3;
+    static const unsigned int BASE = 1000;
+    static const unsigned int DIGIT_COUNT = 3;
     int size;
     int cap;
     int *value;
