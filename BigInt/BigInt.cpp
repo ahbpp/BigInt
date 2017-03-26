@@ -390,9 +390,19 @@ ostream& operator<<(ostream& res, const BigInt &a)
     {
         int d = a.BASE / 10;
         int &v = a.value[i];
-        while (i < a.size - 1 && d > v + 1) {
+        while (i < a.size - 1 && d > v + 1)
+        {
             res << '0';
             d /= 10;
+        }
+        int t = 9;
+        for (int j = 0; j < BigInt::DIGIT_COUNT - 1; j++)
+        {
+            if (i < a.size - 1 && v == t)
+            {
+                cout << '0';
+            }
+            t = (t * 10 + 9);
         }
         cout << a.value[i] << " ";
     }

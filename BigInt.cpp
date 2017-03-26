@@ -508,7 +508,16 @@ ostream& operator<<(ostream& res, const BigInt &a)
             res << '0';
             d /= 10;
         }
-        cout << a.value[i] << " ";
+        int t = 9;
+        for (int j = 0; j < BigInt::DIGIT_COUNT - 1; j++)
+        {
+            if (i < a.size - 1 && v == t)
+            {
+                cout << '0';
+            }
+            t = (t * 10 + 9);
+        }
+        cout << a.value[i];
     }
     cout << endl;
     return res;
@@ -904,5 +913,10 @@ BigInt &BigInt::operator/=(const unsigned long long &value)
 }
 
 int main() {
+    char stra[10002], strb[10002];
+    cin >> stra >> strb;
+    BigInt a(stra), b(strb);
+    cout << a / b << " " << a - a / b;
+    return 0;
 }
 

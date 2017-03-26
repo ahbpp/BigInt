@@ -21,7 +21,7 @@ class BigInt {
 private:
     static const unsigned int BASE = 1000;
     static const unsigned int DIGIT_COUNT = 3;
-    int size;
+
     int cap;
     int *value;
     int sign;
@@ -113,6 +113,8 @@ public:
     BigInt &operator/=(const unsigned int &value);
     BigInt &operator/=(const long long &value);
     BigInt &operator/=(const unsigned long long &value);
+    
+    int size;
 };
 
 class BigIntegerDivisionByZero : logic_error {

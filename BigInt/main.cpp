@@ -12,15 +12,10 @@
 using namespace std;
 
 int main() {
-    int value = 2;
-    BigInt a(value);
-    for (int i = 0; i < 10; i++)
-    {
-        a *= 2;
-        cout << a;
-    }
-    a /= 33;
-    cout << a--;
-    cout << a;
+    char stra[10002], strb[10002];
+    cin >> stra >> strb;
+    BigInt a(stra), b(strb);
+    cout << a << " " << b;
+    cout << a / b << " " << a - ((a / b) * b);
     return 0;
 }
