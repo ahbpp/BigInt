@@ -33,7 +33,7 @@ void BigInt::delete0(){
 
 void BigInt::assign(const char *str)
 {
-    int len = strlen(str);
+    int len = int(strlen(str));
     int ost;
     if (str[0] == '-')
     {
@@ -69,7 +69,7 @@ void BigInt::assign(const BigInt &that)
 }
 void BigInt::assign(const BigInt &that, const int n)
 {
-    set_cap(that.size - n);
+    set_cap(n);
     this->size = this->cap;
     this->sign = that.sign;
     int delta = that.size - this->size;
@@ -343,39 +343,55 @@ BigInt BigInt::mult_by_10_in_n(int n) const
 BigInt BigInt::division(const BigInt &that) const
 {
     BigInt res;
-    BigInt newthat(that);
+    int k = 0;
+    while (that.value[k] == 0)
+    {
+        k++;
+    }
+    BigInt newthat(that, that.size - k);
     newthat.sign = 1;
-    res.set_cap(this->size - newthat.size + 1);
+    BigInt newthis(*this, this->size - k);
+    newthis.sign = 1;
+    res.set_cap(newthis.size - newthat.size + 2);
     res.size = res.cap;
-    int i = this->size - 2;
-    BigInt temp;
-    temp.set_cap(1);
-    temp.size = 1;
-    temp.value[0] = this->value[this->size - 1];
-    temp.sign = 1;
+    for (int i = 0; i < res.size; i++)
+    {
+        res.value[i] = 0;
+    }
+    int i = newthis.size - 1;
+    BigInt temp(0);
     int j = 0;
     while (i >= 0)
     {
-        while (i >= 0 && newthat > temp) {
-            temp = temp.mult_by_BASE_in_n(1) + this->value[i];
+        while (i >= 0 && (newthat > temp || newthat == temp)) {
+            temp = temp.mult_by_BASE_in_n(1) + newthis.value[i];
+            temp.delete0();
             //cout << "temp  " << temp;
             i--;
         }
         if (temp > newthat)
         {
             int base_res = 0;
-            while (temp > newthat)
+            while (temp > newthat || (temp == newthat && i < 0))
             {
                 temp -= newthat;
                 base_res++;
             }
-            res.value[res.size - 1 - j] = base_res;
-            //cout << "res  " << res.value[res.size - 1 - j] << endl;
+            //cout << "base res :" <<  base_res << endl;
+            res.value[res.size - 2 - j] += base_res;
             j++;
         }
     }
+    for (int i = res.size - 1 - j; i < res.size - 1; i++)
+    {
+        res.value[i + 1] += res.value[i] / BASE;
+        res.value[i] = res.value[i] % BASE;
+    }
+    if (res.value[res.size - 1] > 0)
+        j++;
     res.sign = this->sign * that.sign;
-    BigInt result(res, res.size - j);
+    res.delete0();
+    BigInt result(res, j);
     return result;
 }
 
@@ -445,7 +461,7 @@ BigInt &BigInt::operator=(int value)
 //СРАВНЕНИЕ
 bool BigInt::operator>(const BigInt &that) const
 {
-    if (this->size < that.size) {
+    if (this->size < that.size || that == *this) {
         return false;
     } else {
         if (this->size > that.size)
@@ -468,6 +484,7 @@ bool BigInt::operator>(const BigInt &that) const
 }
 bool BigInt::operator==(const BigInt &that) const
 {
+    //cout << that;
     if (this->size != that.size)
     {
         return false;
@@ -475,9 +492,11 @@ bool BigInt::operator==(const BigInt &that) const
         bool flag = true;
         for (int i = 0; i < this->size; i++)
         {
+            //cout << this->value[i] << " " << that.value[i] << endl;
             if (this->value[i] != that.value[i])
                 flag = false;
         }
+        //cout << flag << endl;
         return flag;
     }
 }
@@ -692,7 +711,7 @@ BigInt BigInt::operator*(const long long &value) const
 {
     if (value >= 0 && value < 10)
     {
-        return num_mult(value); 
+        return num_mult(int(value));
     }
     BigInt that(value);
     return *this * that;
@@ -701,7 +720,7 @@ BigInt BigInt::operator*(const unsigned long long &value) const
 {
     if (value < 10)
     {
-        return num_mult(value);
+        return num_mult(int(value));
     }
     BigInt that(value);
     return *this * that;
@@ -736,16 +755,19 @@ BigInt &BigInt::operator*=(const unsigned long long &value)
 
 //division
 BigInt BigInt::operator/(const BigInt &that) const{
+    //cout << that;
     if (that == BigInt(0))
     {
         throw BigIntegerDivisionByZero();
     } else {
         if (that > *this)
         {
+            //cout << "qwerty" << endl;
             return BigInt(0);
         } else {
-            if (*this == that)
+            if (that == *this)
             {
+                //cout << "******** ";
                 return BigInt(1);
             } else {
                 return division(that);

@@ -19,13 +19,13 @@ using namespace std;
 
 class BigInt {
 private:
-    static const unsigned int BASE = 1000;
-    static const unsigned int DIGIT_COUNT = 3;
+    static const unsigned int BASE = 100000;
+    static const unsigned int DIGIT_COUNT = 5;
 
     int cap;
     int *value;
     int sign;
-    
+    int size;
     void set_cap (const int cap);
     void assign(const char *);
     void assign(const BigInt &that);
@@ -46,7 +46,7 @@ private:
     
     bool operator>(const BigInt &that) const;
     bool operator<(const BigInt &that) const;
-    bool operator==(const BigInt &that) const;
+    
     
     BigInt();
     BigInt(const BigInt &that, const int n);
@@ -114,7 +114,7 @@ public:
     BigInt &operator/=(const long long &value);
     BigInt &operator/=(const unsigned long long &value);
     
-    int size;
+    bool operator==(const BigInt &that) const;
 };
 
 class BigIntegerDivisionByZero : logic_error {
