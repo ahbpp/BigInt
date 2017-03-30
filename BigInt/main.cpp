@@ -12,10 +12,4 @@
 using namespace std;
 
 int main() {
-    char stra[10002], strb[10002];
-    cin >> stra >> strb;
-    BigInt a(stra), b(strb);
-    cout << a << b;
-    cout << a / b << a - (a / b) * b;
-    return 0;
 }

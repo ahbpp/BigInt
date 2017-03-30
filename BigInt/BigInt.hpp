@@ -19,8 +19,8 @@ using namespace std;
 
 class BigInt {
 private:
-    static const unsigned int BASE = 100000;
-    static const unsigned int DIGIT_COUNT = 5;
+    static const unsigned int BASE = 10000;
+    static const unsigned int DIGIT_COUNT = 4;
 
     int cap;
     int *value;

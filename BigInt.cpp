@@ -19,8 +19,8 @@ using namespace std;
 
 class BigInt {
 private:
-    static const unsigned int BASE = 100000;
-    static const unsigned int DIGIT_COUNT = 5;
+    static const unsigned int BASE = 10000;
+    static const unsigned int DIGIT_COUNT = 4;
     int size;
     int cap;
     int *value;
@@ -929,11 +929,6 @@ BigInt &BigInt::operator/=(const unsigned long long &value)
 }
 
 int main() {
-    char stra[10002], strb[10002];
-    cin >> stra >> strb;
-    BigInt a(stra), b(strb);
-    cout << a / b;
-    return 0;
 }
 
 

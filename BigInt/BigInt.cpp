@@ -15,7 +15,6 @@ BigIntegerDivisionByZero::BigIntegerDivisionByZero() : logic_error("Division by 
 BigIntegerOverflow::BigIntegerOverflow() : overflow_error("Over flow") {};
 
 
-
 void BigInt::set_cap(const int cap)
 {
     this->cap = cap;
@@ -27,8 +26,6 @@ void BigInt::delete0(){
         this->size--;
     }
 }
-
-
 
 
 void BigInt::assign(const char *str)
@@ -207,8 +204,6 @@ BigInt::~BigInt()
 {
     delete [] this->value;
 }
-
-
 
 
 BigInt BigInt::abs_sum(const BigInt &that) const
@@ -396,7 +391,6 @@ BigInt BigInt::division(const BigInt &that) const
 }
 
 
-
 //ПОТОКИ
 ostream& operator<<(ostream& res, const BigInt &a)
 {
@@ -435,7 +429,6 @@ istream& operator>>(istream& in, BigInt &a)
 }
 
 
-
 //ПРИСВАИВАНИЕ
 BigInt &BigInt::operator=(const BigInt &that)
 {
@@ -455,7 +448,6 @@ BigInt &BigInt::operator=(int value)
     assign(value);
     return *this;
 }
-
 
 
 //СРАВНЕНИЕ
@@ -509,7 +501,6 @@ bool BigInt::operator<(const BigInt &that) const
         return true;
     }
 }
-
 
 
 //+
@@ -752,7 +743,6 @@ BigInt &BigInt::operator*=(const unsigned long long &value)
 }
 
 
-
 //division
 BigInt BigInt::operator/(const BigInt &that) const{
     //cout << that;
@@ -820,4 +810,3 @@ BigInt &BigInt::operator/=(const unsigned long long &value)
     *this = *this / value;
     return *this;
 }
-
