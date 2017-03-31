@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include <cstring>
+#include <cmath>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -34,7 +36,7 @@ private:
     void assign(unsigned int value);
     void assign(long long value);
     void assign(unsigned long long value);
-    void delete0();
+    void reduce_size();
     
     BigInt abs_sum(const BigInt &that) const;
     BigInt abs_minus(const BigInt &that) const;
