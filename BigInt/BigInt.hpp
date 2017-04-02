@@ -13,21 +13,21 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
-#include <cstring>
 #include <cmath>
 #include <stdlib.h>
+#include <cstring>
 
 using namespace std;
 
 class BigInt {
 private:
-    static const unsigned int BASE = 10000;
-    static const unsigned int DIGIT_COUNT = 4;
-
+    static const int BASE = 10000;
+    static const int DIGIT_COUNT = 4;
+    int size;
     int cap;
     int *value;
     int sign;
-    int size;
+    
     void set_cap (const int cap);
     void assign(const char *);
     void assign(const BigInt &that);
@@ -48,7 +48,7 @@ private:
     
     bool operator>(const BigInt &that) const;
     bool operator<(const BigInt &that) const;
-    
+    bool operator==(const BigInt &that) const;
     
     BigInt();
     BigInt(const BigInt &that, const int n);
@@ -115,8 +115,8 @@ public:
     BigInt &operator/=(const unsigned int &value);
     BigInt &operator/=(const long long &value);
     BigInt &operator/=(const unsigned long long &value);
-    
-    bool operator==(const BigInt &that) const;
+    BigInt nod(const BigInt &that) const;
+    BigInt sqrt() const;
 };
 
 class BigIntegerDivisionByZero : logic_error {

@@ -19,8 +19,8 @@ using namespace std;
 
 class BigInt {
 private:
-    static const unsigned int BASE = 10000;
-    static const unsigned int DIGIT_COUNT = 4;
+    static const unsigned int BASE = 1000;
+    static const unsigned int DIGIT_COUNT = 3;
     int size;
     int cap;
     int *value;
@@ -34,7 +34,7 @@ private:
     void assign(unsigned int value);
     void assign(long long value);
     void assign(unsigned long long value);
-    void delete0();
+    void reduce_size();
     
     BigInt abs_sum(const BigInt &that) const;
     BigInt abs_minus(const BigInt &that) const;
@@ -113,6 +113,8 @@ public:
     BigInt &operator/=(const unsigned int &value);
     BigInt &operator/=(const long long &value);
     BigInt &operator/=(const unsigned long long &value);
+    BigInt nod(const BigInt &that) const;
+    BigInt sqrt() const;
 };
 
 class BigIntegerDivisionByZero : logic_error {
@@ -136,7 +138,7 @@ void BigInt::set_cap(const int cap)
     this->size = 0;
     this->value = new int [this->cap];
 }
-void BigInt::delete0(){
+void BigInt::reduce_size(){
     while (this->value[this->size - 1] == 0 && this->size > 1) {
         this->size--;
     }
@@ -147,7 +149,7 @@ void BigInt::delete0(){
 
 void BigInt::assign(const char *str)
 {
-    int len = strlen(str);
+    int len = int(strlen(str));
     int ost;
     if (str[0] == '-')
     {
@@ -258,7 +260,7 @@ void BigInt::assign(long long value)
         this->value[i] = value % BASE;
         value /= BASE;
     }
-    delete0();
+    reduce_size();
 }
 void BigInt::assign(unsigned long long value)
 {
@@ -280,7 +282,7 @@ void BigInt::assign(unsigned long long value)
         this->value[i] = value % BASE;
         value /= BASE;
     }
-    delete0();
+    reduce_size();
 }
 
 
@@ -390,7 +392,7 @@ BigInt BigInt::abs_minus(const BigInt &that) const
             }
         }
         res.size = res.cap;
-        res.delete0();
+        res.reduce_size();
         res.sign = 1;
         return res;
     }
@@ -425,7 +427,7 @@ BigInt BigInt::mult_by_10() const{
     }
     res.value[this->size] = ost;
     res.size = res.cap;
-    res.delete0();
+    res.reduce_size();
     res.sign = this->sign;
     return res;
 }
@@ -479,8 +481,7 @@ BigInt BigInt::division(const BigInt &that) const
     {
         while (i >= 0 && (newthat > temp || newthat == temp)) {
             temp = temp.mult_by_BASE_in_n(1) + newthis.value[i];
-            temp.delete0();
-            //cout << "temp  " << temp;
+            temp.reduce_size();
             i--;
         }
         if (temp > newthat)
@@ -491,7 +492,6 @@ BigInt BigInt::division(const BigInt &that) const
                 temp -= newthat;
                 base_res++;
             }
-            //cout << "base res :" <<  base_res << endl;
             res.value[res.size - 2 - j] += base_res;
             j++;
         }
@@ -504,7 +504,7 @@ BigInt BigInt::division(const BigInt &that) const
     if (res.value[res.size - 1] > 0)
         j++;
     res.sign = this->sign * that.sign;
-    res.delete0();
+    res.reduce_size();
     BigInt result(res, j);
     return result;
 }
@@ -821,7 +821,7 @@ BigInt BigInt::operator*(const long long &value) const
 {
     if (value >= 0 && value < 10)
     {
-        return num_mult(value);
+        return num_mult(int(value));
     }
     BigInt that(value);
     return *this * that;
@@ -830,7 +830,7 @@ BigInt BigInt::operator*(const unsigned long long &value) const
 {
     if (value < 10)
     {
-        return num_mult(value);
+        return num_mult(int(value));
     }
     BigInt that(value);
     return *this * that;
@@ -927,8 +927,51 @@ BigInt &BigInt::operator/=(const unsigned long long &value)
     *this = *this / value;
     return *this;
 }
-
-int main() {
+BigInt BigInt::nod(const BigInt &that) const
+{
+    BigInt newthis(*this);
+    BigInt newthat(that);
+    BigInt zero(0);
+    while (!(newthis == zero) && !(newthat == zero)) {
+        if (newthis > newthat) {
+            newthis = newthis- (newthis / newthat) * newthat;
+        }
+        else {
+            newthat = newthat - (newthat / newthis) * newthis;
+        }
+    }
+    return newthis + newthat;
+}
+BigInt BigInt::sqrt() const
+{
+    BigInt top(*this);
+    BigInt down(1);
+    BigInt mid((top + down) / 2);
+    BigInt mid2(mid * mid);
+    bool flag = true;
+    while (flag) {
+        if ((*this > mid2 && (mid + 1) * (mid + 1) > *this) || mid2 == *this) {
+            flag = false;
+        }
+        else {
+            if (*this > mid2) {
+                down = mid;
+            }
+            else {
+                top = mid;
+            }
+            mid = (top + down) / 2;
+            mid2 = mid * mid;
+        }
+    }
+    return mid;
 }
 
 
+int main() {
+    char stra[256];
+    cin >> stra;
+    BigInt a(stra);
+    cout << a.sqrt();
+    return 0;
+}

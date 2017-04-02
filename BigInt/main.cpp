@@ -12,4 +12,10 @@
 using namespace std;
 
 int main() {
+    char stra[10002];
+    cin >> stra;
+    BigInt a(stra);
+    BigInt c(a.sqrt());
+    cout << c;
+    return 0;
 }

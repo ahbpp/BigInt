@@ -14,6 +14,7 @@ BigIntegerDivisionByZero::BigIntegerDivisionByZero() : logic_error("Division by 
 BigIntegerOverflow::BigIntegerOverflow() : overflow_error("Over flow") {};
 
 
+
 void BigInt::set_cap(const int cap)
 {
     this->cap = cap;
@@ -25,6 +26,8 @@ void BigInt::reduce_size(){
         this->size--;
     }
 }
+
+
 
 
 void BigInt::assign(const char *str)
@@ -203,6 +206,8 @@ BigInt::~BigInt()
 {
     delete [] this->value;
 }
+
+
 
 
 BigInt BigInt::abs_sum(const BigInt &that) const
@@ -388,6 +393,7 @@ BigInt BigInt::division(const BigInt &that) const
 }
 
 
+
 //ПОТОКИ
 ostream& operator<<(ostream& res, const BigInt &a)
 {
@@ -397,8 +403,7 @@ ostream& operator<<(ostream& res, const BigInt &a)
     {
         int d = a.BASE / 10;
         int &v = a.value[i];
-        while (i < a.size - 1 && d > v + 1)
-        {
+        while (i < a.size - 1 && d > v + 1) {
             res << '0';
             d /= 10;
         }
@@ -411,7 +416,7 @@ ostream& operator<<(ostream& res, const BigInt &a)
             }
             t = (t * 10 + 9);
         }
-        cout << a.value[i] << " ";
+        cout << a.value[i];
     }
     cout << endl;
     return res;
@@ -424,6 +429,7 @@ istream& operator>>(istream& in, BigInt &a)
     a.assign(str);
     return in;
 }
+
 
 
 //ПРИСВАИВАНИЕ
@@ -447,10 +453,11 @@ BigInt &BigInt::operator=(int value)
 }
 
 
+
 //СРАВНЕНИЕ
 bool BigInt::operator>(const BigInt &that) const
 {
-    if (this->size < that.size || that == *this) {
+    if (this->size < that.size || *this == that) {
         return false;
     } else {
         if (this->size > that.size)
@@ -495,6 +502,7 @@ bool BigInt::operator<(const BigInt &that) const
         return true;
     }
 }
+
 
 
 //+
@@ -737,21 +745,19 @@ BigInt &BigInt::operator*=(const unsigned long long &value)
 }
 
 
+
 //division
 BigInt BigInt::operator/(const BigInt &that) const{
-    //cout << that;
     if (that == BigInt(0))
     {
         throw BigIntegerDivisionByZero();
     } else {
         if (that > *this)
         {
-            //cout << "qwerty" << endl;
             return BigInt(0);
         } else {
-            if (that == *this)
+            if (*this == that)
             {
-                //cout << "******** ";
                 return BigInt(1);
             } else {
                 return division(that);
@@ -803,4 +809,44 @@ BigInt &BigInt::operator/=(const unsigned long long &value)
 {
     *this = *this / value;
     return *this;
+}
+
+BigInt BigInt::nod(const BigInt &that) const
+{
+    BigInt newthis(*this);
+    BigInt newthat(that);
+    BigInt zero(0);
+    while (!(newthis == zero) && !(newthat == zero)) {
+        if (newthis > newthat) {
+            newthis = newthis- (newthis / newthat) * newthat;
+        }
+        else {
+            newthat = newthat - (newthat / newthis) * newthis;
+        }
+    }
+    return newthis + newthat;
+}
+BigInt BigInt::sqrt() const
+{
+    BigInt top(*this);
+    BigInt down(1);
+    BigInt mid((top + down) / 2);
+    BigInt mid2 (mid * mid);
+    bool flag = true;
+    while (flag) {
+        if ((*this > mid2 && ((mid + 1) * (mid + 1)) > *this) || mid2 == *this) {
+            flag = false;
+        }
+        else {
+            if (*this > mid2) {
+                down = (top + down) / 2;
+            }
+            else {
+                top = (top + down) / 2;
+            }
+            mid = (top + down) / 2;
+            mid2 = mid * mid;
+        }
+    }
+    return mid;
 }
